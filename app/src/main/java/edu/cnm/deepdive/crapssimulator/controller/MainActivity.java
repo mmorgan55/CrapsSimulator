@@ -1,14 +1,15 @@
-package edu.cnm.deepdive.crapssimulator;
+package edu.cnm.deepdive.crapssimulator.controller;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import edu.cnm.deepdive.crapssimulator.R;
 import edu.cnm.deepdive.crapssimulator.model.Game;
 import edu.cnm.deepdive.crapssimulator.model.Game.Roll;
+import edu.cnm.deepdive.crapssimulator.view.RollAdapter;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
   private TextView percentage;
   private ListView rolls;
   private Thread runner;
+  private RollAdapter adapter;
 
 
   @Override
@@ -33,11 +35,13 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     Random rng = new SecureRandom();
+    adapter = new RollAdapter(this);
     game = new Game(rng);
     wins = findViewById(R.id.wins);
     losses = findViewById(R.id.losses);
     percentage = findViewById(R.id.percentage);
     rolls = findViewById(R.id.rolls);
+    rolls.setAdapter(adapter);
     updateTally(0, 0);
   }
 
@@ -55,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
   @Override
   public boolean onPrepareOptionsMenu(Menu menu) {
     super.onPrepareOptionsMenu(menu);
+    //TODO Ideally, we should only setVisible(false if an action bar
     next.setEnabled(!running);
     next.setVisible(!running);
     fast.setEnabled(!running);
@@ -62,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
     pause.setEnabled(running);
     pause.setVisible(running);
     reset.setEnabled(!running);
-    reset.setVisible(!running);
     return true;
   }
 
@@ -102,9 +106,8 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void updateRolls(List<Roll> rolls) {
-    ArrayAdapter<Roll> adapter =
-        new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, rolls);
-    this.rolls.setAdapter(adapter);
+    adapter.clear();
+    adapter.addAll(rolls);
   }
 
   private void runFast(boolean start) {
